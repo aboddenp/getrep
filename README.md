@@ -2,6 +2,11 @@
 
 **GetRep** is a fitness tracking app that helps users log exercises, track workouts, and stay consistent with their training goals.
 
+## 🧠 Schema Diagram & User Stories
+
+View the full schema diagram and user stories in Miro:  
+👉 [Open Miro Board](https://miro.com/app/board/uXjVIrSuMVk=/?share_link_id=378624079543)
+
 ## 🚀 Features
 
 - User account system
@@ -106,4 +111,3 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-## 🧠 Schema Diagram & User Stories
