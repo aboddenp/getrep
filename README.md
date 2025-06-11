@@ -1,4 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏋️‍♂️ GetRep
+
+**GetRep** is a fitness tracking app that helps users log exercises, track workouts, and stay consistent with their training goals.
+
+## 🚀 Features
+
+- User account system
+- Exercise logging
+- Workout history tracking
+- Prisma + PostgreSQL schema
+- Vercel-ready deployment
+
+## 🛠️ Tech Stack
+
+- [Next.js](https://nextjs.org/)
+- [Prisma ORM](https://www.prisma.io/)
+- [PostgreSQL](https://www.postgresql.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Vercel](https://vercel.com/) for hosting
+
+## 🧪 Local Development
+
+# 🛠️ Prisma CLI Commands Explained
+
+## `npx prisma generate`
+
+📦 **Generates the Prisma Client** based on your `schema.prisma` file.
+
+- Creates a fully typed TypeScript/JavaScript client for interacting with your database.
+- Must be re-run whenever you change your schema.
+
+```bash
+npx prisma generate
+```
+
+---
+
+## `npx prisma migrate dev --name init`
+
+⚙️ **Creates and applies a new database migration** with the name `init`.
+
+- Updates your database structure based on your schema.
+- Automatically runs `prisma generate` afterward.
+- Recommended for development use.
+
+```bash
+npx prisma migrate dev --name init
+```
+
+---
+
+## `npx prisma db push`
+
+📤 **Pushes the current schema to your database** without creating a migration file.
+
+- Useful for rapid prototyping.
+- Doesn't maintain a migration history (not ideal for production).
+
+```bash
+npx prisma db push
+```
+
+---
+
+## `npx prisma db seed`
+
+🌱 **Runs your seed script** to populate your database with initial data.
+
+- Use it to insert mock or starter data (users, exercises, etc).
+
+```bash
+npx prisma db seed
+```
 
 ## Getting Started
 

@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String            @id
+  email       String            @unique
+  first_name  String
+  last_name   String
+  username    String?
+  image_url   String
+  weight_unit WeightUnit        @default(KG) ///  preferred weight unit that will be used for everythin
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime?         @updatedAt
+  exercises   Exercise[]
+  logHistory  ExerciseSession[]
+  workouts    Workout[]
+  goals       Goal[]
+}
+
+model Exercise {
+  id            Int               @id @default(autoincrement())
+  name          String
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime?         @updatedAt
+  User          User              @relation(fields: [userId], references: [id])
+  userId        String
+  logHistory    ExerciseSession[]
+  goals         Goal[]
+  muscle_groups MuscleGroup[]
+  Set           Set[]
+}
+
+model ExerciseSession {
+  id            Int       @id @default(autoincrement())
+  Exercise      Exercise  @relation(fields: [exerciseId], references: [id])
+  exerciseId    Int
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt
+  effort        Int?      @db.SmallInt
+  target_weight Int?
+  note          String?
+  User          User      @relation(fields: [userId], references: [id])
+  userId        String
+  sets          Set[]
+  Workout       Workout?  @relation(fields: [workoutId], references: [id])
+  workoutId     Int?
+}
+
+model Set {
+  id                Int             @id @default(autoincrement())
+  order             Int
+  weight            Int             @default(0)
+  reps              Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime?       @updatedAt
+  exercise          Exercise        @relation(fields: [exerciseId], references: [id])
+  ExerciseSession   ExerciseSession @relation(fields: [exerciseSessionId], references: [id])
+  exerciseSessionId Int
+  exerciseId        Int
+}
+
+model MuscleGroup {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  exercises Exercise[]
+}
+
+model Goal {
+  id            Int       @id @default(autoincrement())
+  name          String?
+  target_weight Int       @default(10)
+  target_reps   Int       @default(1)
+  target_sets   Int       @default(1)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt
+  Exercise      Exercise  @relation(fields: [exerciseId], references: [id])
+  exerciseId    Int
+  User          User      @relation(fields: [userId], references: [id])
+  userId        String
+
+  @@unique([userId, exerciseId, name])
+}
+
+model Workout {
+  id                Int               @id @default(autoincrement())
+  name              String?
+  effort            Int?              @default(5)
+  note              String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime?         @updatedAt
+  exercise_sessions ExerciseSession[]
+  User              User              @relation(fields: [userId], references: [id])
+  userId            String
+}
+
+enum WeightUnit {
+  KG
+  LB
+}
