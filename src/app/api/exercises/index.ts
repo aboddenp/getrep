@@ -1,18 +1,18 @@
 import { requireUser } from "@/app/lib/auth/requireUser";
-import { prisma } from "@/app/lib/db";
+import { getAllExercises } from "@/app/lib/queries/exercises";
+import { withErrorHandler } from "@/app/lib/withErrorHandler";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
-  const userIdOrResponse = requireUser(req);
+async function get(req: NextRequest) {
+  const user = requireUser(req);
 
-  if (userIdOrResponse instanceof NextResponse) {
-    return userIdOrResponse; // unauthorized response
+  if (!user.ok) {
+    return user.response;
   }
 
-  const user = userIdOrResponse;
-
-  const exercises = await prisma.exercise.findMany({ where: { userId: user.userId } })
+  const exercises = await getAllExercises(user.userId)
 
   return NextResponse.json(exercises, { status: 200 })
-
 }
+
+export const GET = withErrorHandler(get);

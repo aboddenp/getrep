@@ -10,6 +10,7 @@ import {
 import { Geist, Geist_Mono } from 'next/font/google'
 import { syncUserDB } from './lib/auth/usersync'
 import './globals.css'
+import { getAllExercises } from './lib/queries/exercises'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
