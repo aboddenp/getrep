@@ -1,4 +1,4 @@
-# 🏋️‍♂️ GetRep
+# 🏋️‍♂️Work in progress: GetRep
 
 **GetRep** is a fitness tracking app that helps users log exercises, track workouts, and stay consistent with their training goals.
 
