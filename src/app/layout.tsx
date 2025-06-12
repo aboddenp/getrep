@@ -10,7 +10,10 @@ import {
 import { Geist, Geist_Mono } from 'next/font/google'
 import { syncUserDB } from './lib/auth/usersync'
 import './globals.css'
-import { getAllExercises } from './lib/queries/exercises'
+import { Prisma } from '@prisma/client'
+import { GetExerciseList } from './lib/queries/exercises'
+import ExerciseList from '@/components/ExerciseList/ExerciseList'
+import { ExerciseListItemType } from './lib/types/Exercise'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -33,6 +36,13 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const user = await syncUserDB();
+  let exercises;
+
+  if (user?.id) {
+    exercises = await GetExerciseList(user?.id);
+    console.log(exercises);
+  }
+
 
   return (
     <ClerkProvider>
@@ -44,10 +54,14 @@ export default async function RootLayout({
               <SignUpButton />
             </SignedOut>
             <SignedIn>
-              <UserButton />
-              <p>Your are so cool</p>
+              <div style={{ width: 'fit-content', margin: '0 auto' }}>
+                <UserButton />
+                <p>Your are so cool</p>
+
+              </div>
             </SignedIn>
           </header>
+          {exercises && < ExerciseList exercises={exercises} />}
           {children}
         </body>
       </html>

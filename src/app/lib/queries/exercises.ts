@@ -1,15 +1,24 @@
+import { ExerciseListItemCreateInputType, ExerciseListItemSchema, ExerciseListItemType } from "../types/Exercise";
 import { prisma } from "../db";
 import { Prisma } from '@prisma/client';
 
 // Fetch all exercises for a user
-export async function getAllExercises(userId: string) {
-  return await prisma.exercise.findMany({
+export async function GetExerciseList(userId: string) {
+  const dbResponse: ExerciseListItemType[] = await prisma.exercise.findMany({
     where: { userId },
+    select: {
+      id: true,
+      name: true,
+      muscle_groups: true
+    }
   });
+
+  return ExerciseListItemSchema.array().parse(dbResponse);
+
 }
 
 // Fetch a single exercise by ID, and verify it belongs to the user
-export async function getExercise(userId: string, exerciseId: number) {
+export async function getExercise(userId: string, exerciseId: string) {
   const exercise = await prisma.exercise.findUnique({
     where: { id: exerciseId },
   });
@@ -24,18 +33,35 @@ export async function getExercise(userId: string, exerciseId: number) {
 // Create an exercise and link it to the user
 export async function createExercise(
   userId: string,
-  exercise: Omit<Prisma.ExerciseUncheckedCreateInput, 'userId'>
-) {
-  return await prisma.exercise.create({
+  exercise: ExerciseListItemCreateInputType
+): Promise<ExerciseListItemType> {
+  const dbResponse = await prisma.exercise.create({
     data: {
-      ...exercise,
+      name: exercise.name,
+      muscle_groups: {
+        connectOrCreate: (exercise.muscle_groups || []).map(group => ({
+          // Criteria to find an existing record
+          where: {
+            name: group.name,
+          },
+          // Data to create if not found
+          create: {
+            name: group.name,
+          },
+        })),
+      },
       userId,
     },
+    include: {
+      muscle_groups: true
+    },
   });
+
+  return dbResponse;
 }
 
 // Delete only if the exercise belongs to the user
-export async function deleteExercise(userId: string, exerciseId: number) {
+export async function deleteExercise(userId: string, exerciseId: string) {
   const result = await prisma.exercise.deleteMany({
     where: {
       id: exerciseId,
@@ -49,7 +75,7 @@ export async function deleteExercise(userId: string, exerciseId: number) {
 // Update only if the exercise belongs to the user
 export async function updateExercise(
   userId: string,
-  exerciseId: number,
+  exerciseId: string,
   exercise: Omit<Prisma.ExerciseUpdateInput, 'User'>
 ) {
   const result = await prisma.exercise.updateMany({
