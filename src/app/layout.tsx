@@ -10,10 +10,8 @@ import {
 import { Geist, Geist_Mono } from 'next/font/google'
 import { syncUserDB } from './lib/auth/usersync'
 import './globals.css'
-import { Prisma } from '@prisma/client'
 import { GetExerciseList } from './lib/queries/exercises'
 import ExerciseList from '@/components/ExerciseList/ExerciseList'
-import { ExerciseListItemType } from './lib/types/Exercise'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -47,7 +45,7 @@ export default async function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <body className={` dark ${geistSans.variable} ${geistMono.variable} antialiased`}>
           <header className="flex justify-end items-center p-4 gap-4 h-16">
             <SignedOut>
               <SignInButton />
@@ -57,7 +55,6 @@ export default async function RootLayout({
               <div style={{ width: 'fit-content', margin: '0 auto' }}>
                 <UserButton />
                 <p>Your are so cool</p>
-
               </div>
             </SignedIn>
           </header>

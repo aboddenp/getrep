@@ -3,7 +3,7 @@ import { MuscleGroup } from './MuscleGroup'
 
 export const ExerciseListItemSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: z.string().nonempty('Exercise Name should not be empty'),
   muscle_groups: z.array(MuscleGroup).nullable(),
   createdAt: z.date().optional(),
   updatedAt: z.date().nullable().optional()
