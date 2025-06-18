@@ -30,31 +30,32 @@ model User {
 }
 
 model Exercise {
-  id            String            @id @default(uuid())
-  name          String
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime?         @updatedAt
-  User          User              @relation(fields: [userId], references: [id])
-  userId        String
-  log_history   ExerciseSession[]
-  goals         Goal[]
-  muscle_groups MuscleGroup[]
-  Set           Set[]
+  id                  String                @id @default(uuid())
+  name                String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime?             @updatedAt
+  User                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId              String
+  log_history         ExerciseSession[]
+  goals               Goal[]
+  muscle_groups       MuscleGroup[]
+  Set                 Set[]
+  ExerciseMuscleGroup ExerciseMuscleGroup[]
 }
 
 model ExerciseSession {
   id            String    @id @default(uuid())
-  Exercise      Exercise  @relation(fields: [exerciseId], references: [id])
+  Exercise      Exercise  @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   exerciseId    String
   createdAt     DateTime  @default(now())
   updatedAt     DateTime? @updatedAt
   effort        Int?      @db.SmallInt
   target_weight Int?
   note          String?
-  User          User      @relation(fields: [userId], references: [id])
+  User          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        String
   sets          Set[]
-  Workout       Workout?  @relation(fields: [workoutId], references: [id])
+  Workout       Workout?  @relation(fields: [workoutId], references: [id], onDelete: SetNull)
   workoutId     String?
 }
 
@@ -65,16 +66,27 @@ model Set {
   reps              Int             @default(0)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime?       @updatedAt
-  exercise          Exercise        @relation(fields: [exerciseId], references: [id])
-  ExerciseSession   ExerciseSession @relation(fields: [exerciseSessionId], references: [id])
+  exercise          Exercise        @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  ExerciseSession   ExerciseSession @relation(fields: [exerciseSessionId], references: [id], onDelete: Cascade)
   exerciseSessionId String
   exerciseId        String
 }
 
 model MuscleGroup {
-  id        String     @id @default(uuid())
-  name      String     @unique
-  exercises Exercise[]
+  id                  String                @id @default(uuid())
+  name                String                @unique
+  exercises           Exercise[]
+  ExerciseMuscleGroup ExerciseMuscleGroup[]
+}
+
+model ExerciseMuscleGroup {
+  exerciseId    String
+  muscleGroupId String
+
+  exercise    Exercise    @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  muscleGroup MuscleGroup @relation(fields: [muscleGroupId], references: [id], onDelete: Cascade)
+
+  @@id([exerciseId, muscleGroupId]) // Composite primary key
 }
 
 model Goal {
@@ -85,9 +97,9 @@ model Goal {
   target_sets   Int       @default(1)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime? @updatedAt
-  Exercise      Exercise  @relation(fields: [exerciseId], references: [id])
+  Exercise      Exercise  @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   exerciseId    String
-  User          User      @relation(fields: [userId], references: [id])
+  User          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        String
 
   @@unique([userId, exerciseId, name])
@@ -101,7 +113,7 @@ model Workout {
   createdAt         DateTime          @default(now())
   updatedAt         DateTime?         @updatedAt
   exercise_sessions ExerciseSession[]
-  User              User              @relation(fields: [userId], references: [id])
+  User              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId            String
 }
 
