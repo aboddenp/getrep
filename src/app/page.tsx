@@ -5,7 +5,7 @@ export default function Home() {
     <div className={styles.page}>
       <main className={styles.main}>
         <h1 className="text-3xl font-bold underline bg-teal-300 ">
-          Hello world!
+          GET REP WEBAPP
         </h1>
       </main>
     </div>

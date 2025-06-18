@@ -6,8 +6,7 @@ import { Fetcher } from 'swr';
 import useSWR from 'swr';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
-import { z } from 'zod';
-import { TrashIcon, X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 const fetcher: Fetcher<ExerciseListItemType[], string> = (url) =>
   fetch(url).then(res => {
@@ -30,12 +29,12 @@ function ExerciseList({ exercises }: { exercises: ExerciseListItemType[] }) {
           headers: { 'Content-Type': 'application/json' },
         });
         if (!res.ok) throw new Error('Failed');
-        return [...(exercises.filter((ex) => ex.id != id) || [])];
+        return undefined;
       },
       {
-        optimisticData: [...(exercises.filter((ex) => ex.id != id) || [])],
+        optimisticData: (current) => ([...(current?.filter((ex) => ex.id != id) || [])]),
         rollbackOnError: true,
-        populateCache: true,
+        populateCache: false,
         revalidate: false,
       }
     );
@@ -48,6 +47,9 @@ function ExerciseList({ exercises }: { exercises: ExerciseListItemType[] }) {
 
     const payload = ExerciseListItemCreateInputSchema.safeParse({ name: exName })
 
+    const tempID = crypto.randomUUID();
+    setExName('')
+
     await mutate(
       async (current) => {
         const res = await fetch('/api/exercises', {
@@ -59,10 +61,11 @@ function ExerciseList({ exercises }: { exercises: ExerciseListItemType[] }) {
         if (!res.ok) throw new Error('Failed');
 
         const created = await res.json();
-        return [...(current || []), created];
+
+        return [...(current?.filter((ex) => (ex.id != tempID)) || []), created];
       },
       {
-        optimisticData: [...(exercises || []), { id: 'temp', name: exName, muscle_groups: [] }],
+        optimisticData: (current) => [...(current || []), { id: tempID, name: exName, muscle_groups: [] }],
         rollbackOnError: true,
         populateCache: true,
         revalidate: false,
@@ -74,11 +77,11 @@ function ExerciseList({ exercises }: { exercises: ExerciseListItemType[] }) {
   return <div className='mx-auto max-w-3xl'>
 
     <div className='w-full flex flex-col gap-5'>
-      {data?.map((ex: ExerciseListItemType) => (
-        <Card key={ex.id} className='w-full' >
+      {data?.map(({ id, name, muscle_groups }: ExerciseListItemType) => (
+        <Card key={id} className='w-full' >
           <CardContent className='flex'>
-            <span> {ex.name}</span> <span> {JSON.stringify(ex.muscle_groups)}  </span>
-            <TrashIcon onClick={() => deleteExercise(ex.id)} className='ml-auto cursor-pointer' />
+            <span> {name}</span> <span> {JSON.stringify(muscle_groups)}  </span>
+            <Trash2 width={24} height={24} onClick={() => deleteExercise(id)} className='ml-auto cursor-pointer' />
           </CardContent>
         </Card>
       ))}
