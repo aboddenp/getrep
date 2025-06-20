@@ -1,4 +1,4 @@
-import { ExerciseListItemCreateInputType, ExerciseListItemSchema, ExerciseListItemType } from "../types/Exercise";
+import { ExerciseListItemCreateInputType, ExerciseListItemSchema, ExerciseListItemType, ExerciseListItemUpdateType } from "../types/Exercise";
 import { prisma } from "../db";
 import { Prisma } from '@prisma/client';
 
@@ -75,12 +75,11 @@ export async function deleteExercise(userId: string, exerciseId: string) {
 // Update only if the exercise belongs to the user
 export async function updateExercise(
   userId: string,
-  exerciseId: string,
-  exercise: Omit<Prisma.ExerciseUpdateInput, 'User'>
+  exercise: ExerciseListItemUpdateType
 ) {
   const result = await prisma.exercise.updateMany({
     where: {
-      id: exerciseId,
+      id: exercise.id,
       userId: userId,
     },
     data: {
@@ -88,5 +87,5 @@ export async function updateExercise(
     },
   });
 
-  return result.count > 0 ? { id: exerciseId, ...exercise } : null;
+  return result.count > 0 ? { exercise } : null;
 }

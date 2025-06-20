@@ -1,12 +1,12 @@
 'use client'
-import { ExerciseListItemCreateInputSchema, ExerciseListItemCreateInputType, ExerciseListItemType } from '@/app/lib/types/Exercise';
-import React from 'react';
+import { ExerciseListItemCreateInputSchema, ExerciseListItemCreateInputType, ExerciseListItemType, ExerciseListItemUpdateSchema } from '@/app/lib/types/Exercise';
+import React, { KeyboardEvent } from 'react';
 import { FormEvent } from 'react'
 import { Fetcher } from 'swr';
 import useSWR from 'swr';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
-import { Settings2, Trash2 } from 'lucide-react';
+import { EllipsisVertical, Settings2 } from 'lucide-react';
 import { Input } from '../ui/input';
 
 import {
@@ -30,6 +30,8 @@ function ExerciseList({ exercises }: { exercises: ExerciseListItemType[] }) {
 
   const [canEdit, setCanEdit] = React.useState<string | undefined>();
   const [editedName, setEditedName] = React.useState<string>('');
+  const inputs = React.useRef<Record<string, HTMLInputElement | null>>({});
+
 
   async function deleteExercise(id: string) {
 
@@ -57,7 +59,7 @@ function ExerciseList({ exercises }: { exercises: ExerciseListItemType[] }) {
   async function handlSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const payload = ExerciseListItemCreateInputSchema.safeParse({ name: exName })
+    const payload = ExerciseListItemCreateInputSchema.safeParse({ name: exName.trim() })
 
     const tempID = crypto.randomUUID();
     setExName('')
@@ -86,21 +88,70 @@ function ExerciseList({ exercises }: { exercises: ExerciseListItemType[] }) {
 
   }
 
+  async function pushUpdate(editedName: string, editedId?: string) {
+
+    if (!editedId) {
+      return;
+    }
+    const payload = ExerciseListItemUpdateSchema.safeParse({ id: editedId, name: editedName.trim() })
+
+    function changeName(exercise: ExerciseListItemType) {
+      if (exercise.id != editedId) {
+        return exercise;
+      }
+
+      exercise.name = editedName;
+      return exercise;
+    }
+
+    await mutate(
+      async (current) => {
+        const res = await fetch('/api/exercises', {
+          method: 'PUT',
+          body: JSON.stringify(payload.data),
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!res.ok) throw new Error('Failed');
+
+        return undefined;
+      },
+      {
+        optimisticData: (current) => [...(current || [])].filter((e) => changeName(e)),
+        rollbackOnError: true,
+        populateCache: false,
+        revalidate: false,
+      }
+
+    )
+  }
+
   return <div className='mx-auto max-w-3xl'>
 
     <div className='w-full flex flex-col gap-5'>
       {data?.map(({ id, name }: ExerciseListItemType) => (
-        <Card key={id} className='w-full' >
+        <Card key={id} className={`w-full ${id === canEdit ? 'bg-accent outline-1 outline-emerald-50' : ''}`} >
           <CardContent className='flex'>
-            <span> <input name="exerciseName" onChange={(e) => setEditedName(e.target.value)} value={canEdit == id ? editedName : name} readOnly={canEdit !== id} className='bg-transparent outline-0 border-0 p-0 m-0 focus:outline-none focus:ring-0' /> </span>
+            <input name="exerciseName"
+              ref={(elRef) => { inputs.current[id] = elRef }}
+              onBlur={() => (pushUpdate(editedName, canEdit), setEditedName(''), setCanEdit(undefined))}
+              onKeyDown={(e: KeyboardEvent) => {
+                if (e.key === 'Enter') {
+                  pushUpdate(editedName, canEdit), setEditedName(''), setCanEdit(undefined)
+                }
+              }}
+              onChange={(e) => setEditedName(e.target.value)}
+              value={canEdit == id ? editedName : name}
+              readOnly={canEdit !== id}
+              className='bg-transparent outline-0 w-full border-0 p-0 m-0 focus:outline-none focus:ring-0' />
             <DropdownMenu>
               <DropdownMenuTrigger className='ml-auto shrink-0 cursor-pointer'>
-                <Settings2 />
+                <EllipsisVertical />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuLabel>Options</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => { setCanEdit(id), setEditedName(name) }}>Edit</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { setCanEdit(id), setEditedName(name), setTimeout(() => inputs.current[id]?.focus(), 300) }}>Rename</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => { deleteExercise(id) }}>Delete</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

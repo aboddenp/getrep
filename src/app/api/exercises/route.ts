@@ -1,6 +1,6 @@
 import { requireUser } from "@/app/lib/auth/requireUser";
-import { createExercise, GetExerciseList, deleteExercise } from "@/app/lib/queries/exercises";
-import { ExerciseListItemCreateInputSchema } from "@/app/lib/types/Exercise";
+import { createExercise, GetExerciseList, deleteExercise, updateExercise } from "@/app/lib/queries/exercises";
+import { ExerciseListItemCreateInputSchema, ExerciseListItemUpdateSchema } from "@/app/lib/types/Exercise";
 import { withErrorHandler } from "@/app/lib/withErrorHandler";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -46,6 +46,28 @@ async function dExercise(req: NextRequest) {
 
 }
 
+async function put(req: NextRequest) {
+
+  const user = requireUser(req);
+
+  if (!user.ok) {
+    return user.response;
+  }
+  const data = await req.json();
+
+  const dataParsed = ExerciseListItemUpdateSchema.parse(data);
+
+  const success = await updateExercise(user.userId, dataParsed);
+  if (success) {
+
+    return NextResponse.json({ message: 'sucess' }, { status: 200 })
+  }
+
+  return NextResponse.json({ error: 'resource not found or unothorized' }, { status: 400 })
+
+}
+
 export const GET = withErrorHandler(get);
 export const POST = withErrorHandler(post);
 export const DELETE = withErrorHandler(dExercise);
+export const PUT = withErrorHandler(put);
