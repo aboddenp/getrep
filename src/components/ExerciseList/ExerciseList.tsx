@@ -1,22 +1,13 @@
 'use client'
 import { ExerciseListItemCreateInputSchema, ExerciseListItemCreateInputType, ExerciseListItemType, ExerciseListItemUpdateSchema } from '@/app/lib/types/Exercise';
-import React, { KeyboardEvent } from 'react';
+import React from 'react';
 import { FormEvent } from 'react'
 import { Fetcher } from 'swr';
 import useSWR from 'swr';
 import { Button } from '../ui/button';
-import { Card, CardContent } from '../ui/card';
-import { EllipsisVertical, Settings2 } from 'lucide-react';
 import { Input } from '../ui/input';
+import { ExerciseItems } from './ExerciseItems';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 
 const fetcher: Fetcher<ExerciseListItemType[], string> = (url) =>
   fetch(url).then(res => {
@@ -27,11 +18,6 @@ const fetcher: Fetcher<ExerciseListItemType[], string> = (url) =>
 function ExerciseList({ exercises }: { exercises: ExerciseListItemType[] }) {
   const [exName, setExName] = React.useState<string>('');
   const { data, error, isLoading, mutate } = useSWR<ExerciseListItemType[]>(`/api/exercises`, fetcher, { fallbackData: exercises })
-
-  const [canEdit, setCanEdit] = React.useState<string | undefined>();
-  const [editedName, setEditedName] = React.useState<string>('');
-  const inputs = React.useRef<Record<string, HTMLInputElement | null>>({});
-
 
   async function deleteExercise(id: string) {
 
@@ -52,8 +38,6 @@ function ExerciseList({ exercises }: { exercises: ExerciseListItemType[] }) {
         revalidate: false,
       }
     );
-
-
   }
 
   async function handlSubmit(event: FormEvent<HTMLFormElement>) {
@@ -105,7 +89,7 @@ function ExerciseList({ exercises }: { exercises: ExerciseListItemType[] }) {
     }
 
     await mutate(
-      async (current) => {
+      async () => {
         const res = await fetch('/api/exercises', {
           method: 'PUT',
           body: JSON.stringify(payload.data),
@@ -128,38 +112,7 @@ function ExerciseList({ exercises }: { exercises: ExerciseListItemType[] }) {
 
   return <div className='mx-auto max-w-3xl'>
 
-    <div className='w-full flex flex-col gap-5'>
-      {data?.map(({ id, name }: ExerciseListItemType) => (
-        <Card key={id} className={`w-full ${id === canEdit ? 'bg-accent outline-1 outline-emerald-50' : ''}`} >
-          <CardContent className='flex'>
-            <input name="exerciseName"
-              ref={(elRef) => { inputs.current[id] = elRef }}
-              onBlur={() => (pushUpdate(editedName, canEdit), setEditedName(''), setCanEdit(undefined))}
-              onKeyDown={(e: KeyboardEvent) => {
-                if (e.key === 'Enter') {
-                  pushUpdate(editedName, canEdit), setEditedName(''), setCanEdit(undefined)
-                }
-              }}
-              onChange={(e) => setEditedName(e.target.value)}
-              value={canEdit == id ? editedName : name}
-              readOnly={canEdit !== id}
-              className='bg-transparent outline-0 w-full border-0 p-0 m-0 focus:outline-none focus:ring-0' />
-            <DropdownMenu>
-              <DropdownMenuTrigger className='ml-auto shrink-0 cursor-pointer'>
-                <EllipsisVertical />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>Options</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => { setCanEdit(id), setEditedName(name), setTimeout(() => inputs.current[id]?.focus(), 300) }}>Rename</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { deleteExercise(id) }}>Delete</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </CardContent>
-        </Card>
-      ))}
-
-    </div>
+    <ExerciseItems exercises={data || []} onDelete={deleteExercise} onEdit={pushUpdate} />
     <form className='mt-4 flex flex-col gap-3 ' onSubmit={(e) => handlSubmit(e)}>
       <label>
         <Input required id="exerciseName" name="exerciseName" value={exName} onChange={(e) => setExName(e.target.value)} type='text' placeholder='Bench Press' />
