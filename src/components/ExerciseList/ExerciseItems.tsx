@@ -66,7 +66,7 @@ const ExerciseItem = ({
           <DropdownMenuContent>
             <DropdownMenuLabel>Options</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => (setIsEditing(true), setTimeout(() => input.current?.focus(), 300))}>Rename</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => (setIsEditing(true), setTimeout(() => (input.current?.focus(), input.current?.setSelectionRange(editedName.length, editedName.length)), 300))}>Rename</DropdownMenuItem>
             <DropdownMenuItem onClick={() => onDelete(exercise.id)}>Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
