@@ -7,6 +7,7 @@ import useSWR from 'swr';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ExerciseItems } from './ExerciseItems';
+import { getUUID } from '@/lib/utils';
 
 
 const fetcher: Fetcher<ExerciseListItemType[], string> = (url) =>
@@ -45,7 +46,7 @@ function ExerciseList({ exercises }: { exercises: ExerciseListItemType[] }) {
 
     const payload = ExerciseListItemCreateInputSchema.safeParse({ name: exName.trim() })
 
-    const tempID = crypto.randomUUID();
+    const tempID = getUUID();
     setExName('')
 
     await mutate(
