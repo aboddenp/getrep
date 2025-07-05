@@ -4,6 +4,8 @@ import { ExerciseListItemType } from "@/app/lib/types/Exercise"
 import { EllipsisVertical } from "lucide-react"
 import { Card, CardContent } from "../ui/card"
 import { DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenu, DropdownMenuLabel, DropdownMenuContent } from '../ui/dropdown-menu'
+import Link from 'next/link'
+import { clsx } from 'clsx'
 
 type ExerciseItemsProps = {
   exercises: ExerciseListItemType[],
@@ -47,30 +49,34 @@ const ExerciseItem = ({
   return (
     <Card className={`w-full ${isEditing ? 'bg-accent outline-1 outline-emerald-50' : ''}`}>
       <CardContent className="flex">
-        <input
-          name="exerciseName"
-          ref={input}
-          onBlur={() => handleEdit()}
-          onKeyDown={(e: React.KeyboardEvent) => {
-            if (e.key === 'Enter') handleEdit()
-          }}
-          onChange={(e) => setEditedName(e.target.value)}
-          value={isEditing ? editedName : exercise.name}
-          readOnly={!isEditing}
-          className="bg-transparent outline-0 w-full border-0 p-0 m-0 focus:outline-none focus:ring-0"
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger className="ml-auto shrink-0 cursor-pointer">
-            <EllipsisVertical />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>Options</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => (setIsEditing(true), setTimeout(() => (input.current?.focus(), input.current?.setSelectionRange(editedName.length, editedName.length)), 300))}>Rename</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDelete(exercise.id)}>Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Link href={`/${exercise.id}`} className='flex w-full' >
+          <input
+            name="exerciseName"
+            ref={input}
+            onBlur={() => handleEdit()}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key === 'Enter') handleEdit()
+            }}
+            onChange={(e) => setEditedName(e.target.value)}
+            value={isEditing ? editedName : exercise.name}
+            readOnly={!isEditing}
+            className={clsx(" bg-transparent outline-0 w-full border-0 p-0 m-0 focus:outline-none focus:ring-0", { 'pointer-events-none': !isEditing })}
+
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger className="ml-auto shrink-0 cursor-pointer">
+              <EllipsisVertical />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Options</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => (setIsEditing(true), setTimeout(() => (input.current?.focus(), input.current?.setSelectionRange(editedName.length, editedName.length)), 300))}>Rename</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onDelete(exercise.id)}>Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+        </Link>
       </CardContent>
-    </Card>
+    </Card >
   )
 }

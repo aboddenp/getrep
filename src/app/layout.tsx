@@ -1,13 +1,10 @@
 import { type Metadata } from 'next'
 import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
+  ClerkProvider
 } from '@clerk/nextjs'
+import TopNav from '@/components/TopNav';
 import { Geist, Geist_Mono } from 'next/font/google'
+import Container from '@/components/Container';
 import { syncUserDB } from './lib/auth/usersync'
 import './globals.css'
 import { GetExerciseList } from './lib/queries/exercises'
@@ -33,33 +30,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const user = await syncUserDB();
-  let exercises;
-
-  if (user?.id) {
-    exercises = await GetExerciseList(user?.id);
-    console.log(exercises);
-  }
-
 
   return (
     <ClerkProvider>
       <html lang="en">
         <body className={` dark ${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <header className="flex justify-end items-center p-4 gap-4 h-16">
-            <SignedOut>
-              <SignInButton />
-              <SignUpButton />
-            </SignedOut>
-            <SignedIn>
-              <div style={{ width: 'fit-content', margin: '0 auto' }}>
-                <UserButton />
-                <p>Your are so cool</p>
-              </div>
-            </SignedIn>
-          </header>
-          {exercises && < ExerciseList exercises={exercises} />}
-          {children}
+          <TopNav />
+          <Container>
+            {children}
+          </Container>
         </body>
       </html>
     </ClerkProvider>
